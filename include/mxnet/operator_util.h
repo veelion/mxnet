@@ -11,6 +11,10 @@
 #ifndef MXNET_OPERATOR_UTIL_H_
 #define MXNET_OPERATOR_UTIL_H_
 
+#ifdef _MSC_VER
+#pragma warning(disable:4503)  // disable warning: decorated name length exceeded.
+#endif
+
 #include <dmlc/registry.h>
 #include <dmlc/parameter.h>
 #include <map>
@@ -410,6 +414,12 @@ class SimpleOpRegistry {
         LOG(FATAL) << "not reached";    \
     }                                   \
   }
+
+/*!
+* \brief Maximum ndim supported for special operators like broadcasting with non contiguous lhs/rhs
+*/
+#define MXNET_SPECIAL_MAX_NDIM 7
+
 
 //--------------------------------------------------------------
 // The following part are API Registration of Simple Operators
