@@ -1,3 +1,4 @@
+import time
 import find_mxnet
 import mxnet as mx
 import numpy as np
@@ -195,6 +196,7 @@ clip_norm = 1 * np.prod(img.shape)
 tv_grad_executor = get_tv_grad_executor(img, dev, args.tv_weight)
 
 for e in range(args.max_num_epochs):
+    b = time.time()
     img.copyto(model_executor.data)
     model_executor.executor.forward()
     model_executor.executor.backward(grad_array)
@@ -213,12 +215,15 @@ for e in range(args.max_num_epochs):
     eps = (mx.nd.norm(old_img - new_img) / mx.nd.norm(new_img)).asscalar()
 
     old_img = new_img.copyto(dev)
-    logging.info('epoch %d, relative change %f', e, eps)
+    cost = time.time() - b
+    logging.info('epoch %d, relative change %f, time cost:%s', e, eps, cost)
     if eps < args.stop_eps:
         logging.info('eps < args.stop_eps, training finished')
         break
     if (e+1) % args.save_epochs == 0:
-        SaveImage(new_img.asnumpy(), 'output/tmp_'+str(e+1)+'.jpg')
+        outf = args.output.split('/')[-1].split('.')[0]
+        fn = 'output/%s_tmp_%s.jpg' % (outf, e+1)
+        SaveImage(new_img.asnumpy(), fn)
 
 SaveImage(new_img.asnumpy(), args.output)
 
